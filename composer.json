@@ -1,0 +1,19 @@
+{
+    "name": "steamming",
+    "description": "lexemador en php",
+    "autoload": {
+        "psr-0": {
+            "Stemming": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Julian F. Reyes Escrigas",
+            "email": "julian.reyes.escrigas@gmail.com",
+            "homepage": "http://about.me/rkmax"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2"
+    }
+}
