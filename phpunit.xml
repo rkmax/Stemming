@@ -9,10 +9,10 @@
     convertNoticesToExceptions  = "true"
     convertWarningsToExceptions = "true"
     processIsolation            = "false"
-    stopOnFailure               = "false"
-    stopOnError                 = "false"
-    stopOnIncomplete            = "false"
-    stopOnSkipped               = "false"
+    stopOnFailure               = "true"
+    stopOnError                 = "true"
+    stopOnIncomplete            = "true"
+    stopOnSkipped               = "true"
     syntaxCheck                 = "false"
     bootstrap                   = "vendor/autoload.php">
 
