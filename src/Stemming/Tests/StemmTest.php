@@ -124,9 +124,9 @@ class StemmTest extends \PHPUnit_Framework_TestCase
     {
 
         $len= strlen($word);
-        $r1 = Stemm::R1($word, $len);
-        $r2 = Stemm::R2($word, $len, $r1);
-        $rv = Stemm::RV($word, $len);
+        $r1 = Stemm::R($word);
+        $r2 = Stemm::R($word, $r1);
+        $rv = Stemm::RV($word);
 
         $this->assertEquals($r1expected, substr($word, $r1));
         $this->assertEquals($r2expected, substr($word, $r2));

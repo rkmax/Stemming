@@ -67,12 +67,9 @@ class Stemm
             return self::removeAccent($word);
         }
 
-        // $r1 = self::R1($word, $len);
-        // $r2 = self::R2($word, $len, $r1);
-        // $rv = self::RV($word, $len);
         $r1 = self::R($word);
         $r2 = self::R($word, $r1);
-        $rv = self::RV($word, $len);
+        $rv = self::RV($word);
 
         // Step 0: Attached pronoun
         $word = $step0Word  = self::step0($word, $r1, $r2, $rv);
@@ -324,35 +321,7 @@ class Stemm
         return $r;
     }
 
-    public static function R1($word, $len, $start = 0)
-    {
-        $letters = self::mb_str_split($word);
-        $r1 = $len = count($letters);
-
-        for ($i = $start; $i < ($len - 1) && $r1 == $len; $i++) {
-            if (self::isVowel($letters[$i]) && !self::isVowel($letters[$i+1])) {
-                    $r1 = $i + 2;
-            }
-        }
-
-        return $r1;
-    }
-
-    public static function R2($word, $len, $r1)
-    {
-        $letters = self::mb_str_split($word);
-        $r2 = $len = count($letters);
-
-        for ($i = $r1; $i < ($len - 1) && $r2 == $len; $i++) {
-            if (self::isVowel($letters[$i]) && !self::isVowel($letters[$i+1])) {
-                $r2 = $i+2;
-            }
-        }
-
-        return $r2;
-    }
-
-    public static function RV($word, $len)
+    public static function RV($word)
     {
         $letters = self::mb_str_split($word);
         $rv = $len = count($letters);
