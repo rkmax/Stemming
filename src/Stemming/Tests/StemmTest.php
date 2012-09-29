@@ -143,23 +143,4 @@ class StemmTest extends \PHPUnit_Framework_TestCase
             array('narrar', 'narrar', 'narrar')
         );
     }
-
-    /**
-     * @test
-     * @dataProvider stepsProvider
-     */
-    public function steps($word, $step0, $step1)
-    {
-        $len= strlen($word);
-        $r1 = Stemm::R1($word, $len);
-        $r2 = Stemm::R2($word, $len, $r1);
-        $rv = Stemm::RV($word, $len);
-
-        $word0 = Stemm::step0($word, $r1, $r2, $rv);
-        $word1 = Stemm::step1($word0, $r1, $r2, $rv);
-        $word2 = Stemm::step2($word1, $r1, $r2, $rv);
-
-        $this->assertEquals($step0, $word0);
-        $this->assertEquals($step1, $word1);
-    }
 }
