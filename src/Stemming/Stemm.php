@@ -255,7 +255,7 @@ class Stemm
             'iréis', 'iríamos', 'iremos', 'irá', 'iré', 'aba',
             'ada', 'ida', 'ía', 'ara', 'iera', 'ad', 'ed',
             'id', 'ase', 'iese', 'aste', 'iste',
-            'aban', 'an', 'ían', 'aran', 'ieran', 'asen',
+            'aban', 'ían', 'aran', 'ieran', 'an', 'asen',
             'iesen', 'aron', 'ieron', 'ado', 'ido',
             'ando', 'iendo', 'ió', 'ar', 'er', 'ir',
             'abas', 'adas', 'idas', 'ías', 'aras',
