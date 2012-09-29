@@ -16,15 +16,17 @@ class Stemm
 
     public static function getNextVowelPos($word, $start = 0) {
         $len = mb_strlen($word);
+        $letters = self::mb_str_split($word);
         for ($i = $start; $i < $len; $i++)
-            if (self::isVowel($word[$i])) return $i;
+            if (self::isVowel($letters[$i])) return $i;
         return $len;
     }
 
     public static function getNextConsonantPos($word, $start = 0) {
         $len = mb_strlen($word);
+        $letters = self::mb_str_split($word);
         for ($i = $start; $i < $len; $i++)
-            if (!self::isVowel($word[$i])) return $i;
+            if (!self::isVowel($letters[$i])) return $i;
         return $len;
     }
 
@@ -93,7 +95,7 @@ class Stemm
             print "\nDebug\n";
             print "Internal ENCODING: " . mb_internal_encoding();
             print "\nLetter count : " . mb_strlen ($original) . "\n\n  ";
-            print implode('  ', str_split(utf8_decode($original)));
+            print implode('  ', self::mb_str_split($original));
             print "\n\nR1[$r1]: " . mb_substr($original,$r1);
             print "\nR2[$r2]: " . mb_substr($original,$r2);
             print "\nRV[$rv]: " . mb_substr($original,$rv);
@@ -304,12 +306,14 @@ class Stemm
         return $word;
     }
 
-    public static function R1($word, $len) {
-        $r1 = $len;
+    public static function R1($word, $len)
+    {
+        $letters = self::mb_str_split($word);
+        $r1 = $len = count($letters);
 
-        for ($i = 0; $i < ($len-1) && $r1 == $len; $i++) {
-            if (self::isVowel($word[$i]) && !self::isVowel($word[$i+1])) {
-                    $r1 = $i+2;
+        for ($i = 0; $i < ($len - 1) && $r1 == $len; $i++) {
+            if (self::isVowel($letters[$i]) && !self::isVowel($letters[$i+1])) {
+                    $r1 = $i + 2;
             }
         }
 
@@ -318,10 +322,10 @@ class Stemm
 
     public static function R2($word, $len, $r1)
     {
-        $letters = str_split(utf8_decode($word));
+        $letters = self::mb_str_split($word);
         $r2 = $len = count($letters);
 
-        for ($i = $r1; $i < ($len -1) && $r2 == $len; $i++) {
+        for ($i = $r1; $i < ($len - 1) && $r2 == $len; $i++) {
             if (self::isVowel($letters[$i]) && !self::isVowel($letters[$i+1])) {
                 $r2 = $i+2;
             }
@@ -332,12 +336,13 @@ class Stemm
 
     public static function RV($word, $len)
     {
-        $rv = $len;
+        $letters = self::mb_str_split($word);
+        $rv = $len = count($letters);
 
         if ($len > 3) {
-            if (!self::isVowel($word[1])) {
+            if (!self::isVowel($letters[1])) {
                 $rv = self::getNextVowelPos($word, 2) + 1;
-            } else if (self::isVowel($word[0]) && self::isVowel($word[1])) {
+            } else if (self::isVowel($letters[0]) && self::isVowel($letters[1])) {
                 $rv = self::getNextConsonantPos($word, 2) + 1;
             } else {
                 $rv = 3;
@@ -345,5 +350,11 @@ class Stemm
         }
 
         return $rv;
+    }
+
+    public static function mb_str_split( $string ) {
+        # Split at all position not after the start: ^
+        # and not before the end: $
+        return preg_split('/(?<!^)(?!$)/u', $string );
     }
 }
