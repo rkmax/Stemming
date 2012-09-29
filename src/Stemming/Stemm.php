@@ -67,38 +67,37 @@ class Stemm
         $r2 = self::R2($word, $len, $r1);
         $rv = self::RV($word, $len);
 
-        if ($debug) {
-            print "\nRegion:\n";
-            print "R1: " . substr($word, $r1) . "\n";
-            print "R2: " . substr($word, $r2) . "\n";
-            print "RV: " . substr($word, $rv) . "\n";
-        }
-
-
         // Step 0: Attached pronoun
-        $step0Word  = self::step0($word, $r1, $r2, $rv);
-        if($debug) print "\n[0]: " . $step0Word;
+        $word = $step0Word  = self::step0($word, $r1, $r2, $rv);
 
-        // Step 1
-        $step1Word  = self::step1($step0Word, $r1, $r2, $rv);
-        if($debug) print "\n[1]: " . $step1Word;
+        // Step 1: Stadanrd Suffix removal
+        $word = $step1Word  = self::step1($step0Word, $r1, $r2, $rv);
 
-        // Step 2
+        // Step 2: Verb Suffix
         if ($step1Word == $step0Word) {
             // Step 2a
-            $word = $step2Word = self::step2a($step1Word, $r1, $r2, $rv);
-            if($debug) print "\n[2a]: " . $step2Word;
+            $word = $step2aWord = self::step2a($step1Word, $r1, $r2, $rv);
 
             // Step 2b
-            if($step1Word == $step2Word) {
-                $word = self::step2b($step2Word, $r1, $r2, $rv);
-                if($debug) print "\n[2b]: " . $step2Word;
+            if($step1Word == $step2aWord) {
+                $word = $step2bWord = self::step2b($step2aWord, $r1, $r2, $rv);
             }
         }
 
-        // Step 3
+        // Step 3: Residual suffix
         $word = self::step3($word, $r1, $r2, $rv);
-        if($debug) print "\n[3]: " . $word;
+
+        if ($debug) {
+            print "\nDebug\n";
+            print "R1: $r1\n";
+            print "R2: $r2\n";
+            print "RV: $rv\n";
+            print "Steps [0] $step0Word\n";
+            print "Steps [1] $step1Word\n";
+            print "Steps [2a] $step2aWord\n";
+            print "Steps [2b] $step2bWord\n";
+            print "Steps [3] $word\n";
+        }
 
         return self::removeAccent($word);
     }
@@ -125,21 +124,27 @@ class Stemm
 
         $rv_txt = substr($word, $rv);
 
-        if ('' != ($ends = self::endsIn($rv_txt, $pronoun))) {
-            $word = substr($word, 0, -strlen($ends));
+        if ('' != ($ends0 = self::endsIn($rv_txt, $pronoun))) {
             $rv_txt = substr($word, $rv);
-            if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
-                $word = self::removeAccent(substr($word, 0, -strlen($ends)));
+            if ('' != ($ends = self::endsIn(substr($rv_txt, 0, -strlen($ends0)), $suffix_a))) {
+                $word = self::removeAccent(substr($word, 0, -strlen($ends0)));
             } elseif (
-                ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) ||
+                ('' != ($ends = self::endsIn(substr($rv_txt, 0, -strlen($ends0)), $suffix_b))) ||
                     (('' != ($ends = self::endsIn($rv_txt, 'yendo'))) &&
                         (substr($word, 0, -6, 1) == 'u'))
                 ) {
-                $word = substr($word, 0, -strlen($ends));
+                $word = substr($word, 0, -strlen($ends0));
             }
         }
 
         return $word;
+    }
+
+    public static function debugWord($word, $value, $messaje = '')
+    {
+        if($word != $value) return;
+        fwrite(STDOUT, "\n$messaje");
+
     }
 
     public static function step1($word, $r1, $r2, $rv)
@@ -187,10 +192,10 @@ class Stemm
             $word = substr($word, 0, -strlen($ends));
         } else {
             $ends = '';
-            foreach ($suffix_r as $key => $value) {
-                $ends = self::endsIn($r2_txt, $value);
+            foreach ($suffix_r as $replace => $suffix_) {
+                $ends = self::endsIn($r2_txt, $suffix_);
                 if(!empty($ends)) {
-                    $word = substr($word, 0, -strlen($ends)) . $key;
+                    $word = substr($word, 0, -strlen($ends)) . $replace;
                     break;
                 }
             }
