@@ -265,13 +265,13 @@ class Stemm
 
         $rv_txt = mb_substr($word,$rv);
 
-        if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
+        if ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) {
+            $word = mb_substr($word, 0, -mb_strlen($ends));
+        } elseif ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
             $word = mb_substr($word, 0, -mb_strlen($ends));
             if('' != ($ends = self::endsIn($word, 'gu'))) {
                 $word = mb_substr($word, 0, -1);
             }
-        } elseif ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) {
-            $word = mb_substr($word, 0, -mb_strlen($ends));
         }
 
         return $word;
