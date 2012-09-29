@@ -92,15 +92,15 @@ class Stemm
         if ($debug) {
             print "\nDebug\n";
             print "Internal ENCODING: " . mb_internal_encoding();
-            print "\nLetter count : " . mb_strlen ($original) . "\n";
-            print implode(' ', str_split($original));
-            print "\nR1[$r1]: " . mb_substr($original,$r1);
+            print "\nLetter count : " . mb_strlen ($original) . "\n\n  ";
+            print implode('  ', str_split(utf8_decode($original)));
+            print "\n\nR1[$r1]: " . mb_substr($original,$r1);
             print "\nR2[$r2]: " . mb_substr($original,$r2);
             print "\nRV[$rv]: " . mb_substr($original,$rv);
             print "\nSteps [0] $step0Word\n";
             print "Steps [1] $step1Word\n";
-            print "Steps [2a] $step2aWord\n";
-            print "Steps [2b] $step2bWord\n";
+            if(isset($step2aWord)) print "Steps [2a] $step2aWord\n";
+            if(isset($step2bWord)) print "Steps [2b] $step2bWord\n";
             print "Steps [3] $word\n";
         }
 
@@ -318,9 +318,11 @@ class Stemm
 
     public static function R2($word, $len, $r1)
     {
-        $r2 = $len;
+        $letters = str_split(utf8_decode($word));
+        $r2 = $len = count($letters);
+
         for ($i = $r1; $i < ($len -1) && $r2 == $len; $i++) {
-            if (self::isVowel($word[$i]) && !self::isVowel($word[$i+1])) {
+            if (self::isVowel($letters[$i]) && !self::isVowel($letters[$i+1])) {
                 $r2 = $i+2;
             }
         }
