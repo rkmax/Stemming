@@ -123,4 +123,61 @@ class StemmTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, Stemm::endsIn($value, $terminaciones));
     }
+
+    public static function regionesProvider()
+    {
+        return array(
+            // array(WORD, R1, R2, RV)
+            array('calabazas', 'abazas', 'azas','abazas'),
+            array('pelebas', 'ebas', 'as', 'ebas'),
+            array('abrigo', 'rigo', 'o', 'go')
+        );
+    }
+
+    /**
+     * @test
+     * @dataProvider regionesProvider
+     */
+    public function pruebaRegiones($word, $r1expected, $r2expected, $rvexpected)
+    {
+
+        $len= strlen($word);
+        $r1 = Stemm::R1($word, $len);
+        $r2 = Stemm::R2($word, $len, $r1);
+        $rv = Stemm::RV($word, $len);
+
+        $this->assertEquals($r1expected, substr($word, $r1));
+        $this->assertEquals($r2expected, substr($word, $r2));
+        $this->assertEquals($rvexpected, substr($word, $rv));
+    }
+
+    public static function stepsProvider()
+    {
+        return array(
+            array('haciéndola', 'hac', 'hac'),
+            array('construyendo', 'construyendo', 'construyendo'),
+            array('definitivamente', 'definitivamente', 'definit'),
+            array('narrativa', 'narrativa', 'narrat'),
+            array('narrar', 'narrar', 'narrar')
+        );
+    }
+
+    /**
+     * @test
+     * @dataProvider stepsProvider
+     */
+    public function steps($word, $step0, $step1)
+    {
+        $len= strlen($word);
+        $r1 = Stemm::R1($word, $len);
+        $r2 = Stemm::R2($word, $len, $r1);
+        $rv = Stemm::RV($word, $len);
+
+        $word0 = Stemm::step0($word, $r1, $r2, $rv);
+        $word1 = Stemm::step1($word0, $r1, $r2, $rv);
+        $word2 = Stemm::step2($word1, $r1, $r2, $rv);
+
+        $this->assertEquals($step0, $word0);
+        $this->assertEquals($step1, $word1);
+    }
 }

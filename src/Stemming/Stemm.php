@@ -54,7 +54,7 @@ class Stemm
         return '';
     }
 
-    public static function stem($word, $debug = true)
+    public static function stem($word, $debug = false)
     {
         $len = strlen($word);
         $word = mb_strtolower($word, 'UTF-8');
@@ -83,42 +83,59 @@ class Stemm
         $step1Word  = self::step1($step0Word, $r1, $r2, $rv);
         if($debug) print "\n[1]: " . $step1Word;
 
-        // Step 2a
-        $step2Word = self::step2a($step1Word, $r1, $r2, $rv);
-        if($debug) print "\n[2a]: " . $step2Word;
+        // Step 2
+        if ($step1Word == $step0Word) {
+            // Step 2a
+            $word = $step2Word = self::step2a($step1Word, $r1, $r2, $rv);
+            if($debug) print "\n[2a]: " . $step2Word;
 
-        // Step 2b
-        if($step1Word == $step2Word) {
-            $step2Word = self::step2b($step2Word, $r1, $r2, $rv);
-            if($debug) print "\n[2b]: " . $step2Word;
+            // Step 2b
+            if($step1Word == $step2Word) {
+                $word = self::step2b($step2Word, $r1, $r2, $rv);
+                if($debug) print "\n[2b]: " . $step2Word;
+            }
         }
 
         // Step 3
-        $word = self::step2a($step2Word, $r1, $r2, $rv);
+        $word = self::step3($word, $r1, $r2, $rv);
         if($debug) print "\n[3]: " . $word;
 
         return self::removeAccent($word);
     }
 
+    /**
+     * Step 0: Attached pronoun
+     * Elimina los pronombres que tenga la palabra al final
+     * @param  string $word palabras
+     * @param  int    $r1   Region 1
+     * @param  int    $r2   Region 2
+     * @param  int    $rv   Region V
+     * @return string
+     */
     public static function step0($word, $r1, $r2, $rv)
     {
-        $rv_txt = substr($word,$rv);
+        $pronoun = array(
+            'me', 'se', 'sela', 'selo', 'selas',
+            'selos', 'la', 'le', 'lo', 'las',
+            'les', 'los', 'nos'
+        );
 
-        $ends0 = self::endsIn($word, self::$PRO_0_SUF);
+        $suffix_a = array('iéndo','ándo','ár', 'ér', 'ír');
+        $suffix_b = array('ando', 'iendo', 'ar', 'er', 'ir');
 
-        if (!empty($ends0)) {
-            $ends1 = self::endsIn(substr($rv_txt, 0, -strlen($ends0)), self::$PRO_0_SUF1);
-            if (!empty($ends1)) {
-                $word = self::removeAccent(substr($word, 0, -strlen($ends0)));
-            } else {
-                $ends1 = self::endsIn(substr($rv_txt, 0, -strlen($ends0)), self::$PRO_0_SUF2);
-                $yendo = self::endsIn($word, 'yendo');
+        $rv_txt = substr($word, $rv);
 
-                if(!empty($ends1)  ||
-                   (!empty($yendo)) &&
-                    (substr($word, -strlen($ends0)-6, 1) == 'u')) {
-                    $word = substr($word, 0, -strlen($ends0));
-                }
+        if ('' != ($ends = self::endsIn($rv_txt, $pronoun))) {
+            $word = substr($word, 0, -strlen($ends));
+            $rv_txt = substr($word, $rv);
+            if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
+                $word = self::removeAccent(substr($word, 0, -strlen($ends)));
+            } elseif (
+                ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) ||
+                    (('' != ($ends = self::endsIn($rv_txt, 'yendo'))) &&
+                        (substr($word, 0, -6, 1) == 'u'))
+                ) {
+                $word = substr($word, 0, -strlen($ends));
             }
         }
 
@@ -130,38 +147,78 @@ class Stemm
         $r1_txt = substr($word,$r1);
         $r2_txt = substr($word,$r2);
 
-        // Regla [Sufijo(s), reemplazo]
-        $replace = array(
-            array(self::$_1_SUF1, '', "r2_txt"),
-            array(self::$_1_SUF2, '', "r2_txt"),
-            array(self::$_1_SUF_LOG, 'log', "r2_txt"),
-            array(self::$_1_SUF_UC, 'u', "r2_txt"),
-            array(self::$_1_SUF_ENC, 'ente', "r2_txt"),
-            array(self::$_1_SUF_MEN_1, '', "r2_txt"),
-            array(self::$_1_SUF_MEN_2, '', "r1_txt"),
-            array(self::$_1_SUF_MEN_3, '', "r2_txt"),
-            array(self::$_1_SUF_DA, '', "r2_txt"),
-            array(self::$_1_SUF_I, '', "r2_txt"),
+        $suffix = array(
+            // A
+            'anza', 'anzas', 'ico', 'ica', 'icos',
+            'icas', 'ismo', 'ismos', 'able', 'ables',
+            'ible', 'ibles', 'ista', 'istas', 'oso',
+            'osa', 'osos', 'osas', 'amiento', 'amientos',
+            'imiento', 'imientos',
+            // B
+            'icadora', 'icador', 'icación',
+            'icadoras', 'icadores', 'icaciones',
+            'icante', 'icantes', 'icancia', 'icancias',
+            'adora', 'ador', 'ación', 'adoras',
+            'adores', 'aciones', 'ante', 'antes',
+            'ancia', 'ancias'
         );
 
-        foreach ($replace as $value) {
-            $ends = self::endsIn($$value[2], $value[0]);
-            if (!empty($ends)) {
-                $word = substr($word, 0, -strlen($ends)) . $value[1];
-                break;
+        $suffix_r = array(
+            'log'  => array('logía', 'logías'),
+            'u'    => array('ución', 'uciones'),
+            'ente' => array('encia', 'encias')
+        );
+
+        $suffix_amente = array(
+            'ativamente', 'ivamente', 'osamente', 'icamente', 'adamente',
+        );
+
+        $suffix_remain = array(
+            // mente
+            'antemente', 'ablemente', 'iblemente', 'mente',
+            // idad
+            'abilidad', 'abilidades', 'icidad', 'icidades',
+            'ividad', 'ividades', 'idad', 'idades',
+            // iv
+            'ativa', 'ativo', 'ativas', 'ativos', 'iva', 'ivo', 'ivas', 'ivos',
+        );
+
+        if ('' != ($ends = self::endsIn($r2_txt, $suffix))) {
+            $word = substr($word, 0, -strlen($ends));
+        } else {
+            $ends = '';
+            foreach ($suffix_r as $key => $value) {
+                $ends = self::endsIn($r2_txt, $value);
+                if(!empty($ends)) {
+                    $word = substr($word, 0, -strlen($ends)) . $key;
+                    break;
+                }
             }
         }
 
-        $replace = null;
+        if(empty($ends)) {
+            if('' != ($ends = self::endsIn($r2_txt, $suffix_amente))) {
+                $word = substr($word, 0, -strlen($ends));
+            } elseif('' != ($ends = self::endsIn($r1_txt, 'amente'))) {
+                $word = substr($word, 0, -strlen($ends));
+            } elseif('' != ($ends = self::endsIn($r2_txt, $suffix_remain))) {
+                $word = substr($word, 0, -strlen($ends));
+            }
+        }
 
         return $word;
     }
 
     public static function step2a($word, $r1, $r2, $rv)
     {
-        $rv_txt = substr($word,$rv);
+        $suffix = array(
+            'ya', 'ye', 'yan', 'yen', 'yeron',
+            'yendo', 'yo', 'yó', 'yas', 'yes',
+            'yais', 'yamos'
+        );
 
-        $ends = self::endsIn($rv_txt, self::$_2a_SUF);
+        $rv_txt = substr($word,$rv);
+        $ends = self::endsIn($rv_txt, $suffix);
 
         if (!empty($ends) && (substr($word,-strlen($ends)-1,1) == 'u')) {
             $word = substr($word, 0, -strlen($ends));
@@ -172,14 +229,38 @@ class Stemm
 
     public static function step2b($word, $r1, $r2, $rv)
     {
+
+        $suffix_a = array(
+            'en', 'es', 'éis', 'emos'
+        );
+
+        $suffix_b = array(
+            'arían', 'arías', 'arán', 'arás', 'aríais',
+            'aría', 'aréis', 'aríamos', 'aremos', 'ará',
+            'aré', 'erían', 'erías', 'erán', 'erás', 'eríais',
+            'ería', 'eréis', 'eríamos', 'eremos', 'erá', 'eré',
+            'irían', 'irías', 'irán', 'irás', 'iríais', 'iría',
+            'iréis', 'iríamos', 'iremos', 'irá', 'iré', 'aba',
+            'ada', 'ida', 'ía', 'ara', 'iera', 'ad', 'ed',
+            'id', 'ase', 'iese', 'aste', 'iste', 'an',
+            'aban', 'ían', 'aran', 'ieran', 'asen',
+            'iesen', 'aron', 'ieron', 'ado', 'ido',
+            'ando', 'iendo', 'ió', 'ar', 'er', 'ir',
+            'abas', 'adas', 'as', 'idas', 'ías', 'aras',
+            'ieras', 'ases', 'ieses', 'ís', 'áis', 'abais',
+            'íais', 'arais', 'ierais', '  aseis', 'ieseis',
+            'asteis', 'isteis', 'ados', 'idos', 'amos', 'ábamos',
+            'íamos', 'imos', 'áramos', 'iéramos', 'iésemos', 'ásemos'
+        );
+
         $rv_txt = substr($word,$rv);
 
-        if ('' != ($ends = self::endsIn($rv_txt, self::$_2b_SUF_1))) {
+        if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
             $word = substr($word, 0, -strlen($ends));
             if('' != ($ends = self::endsIn($word, 'gu'))) {
                 $word = substr($word, 0, -1);
             }
-        } elseif ('' != ($ends = self::endsIn($rv_txt, self::$_2b_SUF_2))) {
+        } elseif ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) {
             $word = substr($word, 0, -strlen($ends));
         }
 
@@ -188,11 +269,20 @@ class Stemm
 
     public static function step3($word, $r1, $r2, $rv)
     {
+
+        $suffix_a = array(
+            'os', 'a', 'o', 'á', 'í', 'ó'
+        );
+
+        $suffix_b = array(
+            'e', 'é'
+        );
+
         $rv_txt = substr($word,$rv);
 
-        if ('' != ($ends = self::endsIn($rv_txt, self::$_3_SUF_1))) {
+        if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
             $word = substr($word, 0, -strlen($ends));
-        } elseif ('' != ($ends = self::endsIn($rv_txt, self::$_3_SUF_2))) {
+        } elseif ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) {
             $word = substr($word, 0, -1);
             $rv_txt = substr($word,$rv);
 
@@ -235,7 +325,7 @@ class Stemm
 
         if ($len > 3) {
             if (!self::isVowel($word[1])) {
-                $rv = self::getNextVowelPos($word, 2) +1;
+                $rv = self::getNextVowelPos($word, 2) + 1;
             } else if (self::isVowel($word[0]) && self::isVowel($word[1])) {
                 $rv = self::getNextConsonantPos($word, 2) + 1;
             } else {
@@ -245,106 +335,4 @@ class Stemm
 
         return $rv;
     }
-
-    private static $PRO_0_SUF = array(
-        'me', 'se', 'sela', 'selo', 'selas',
-        'selos', 'la', 'le', 'lo', 'las',
-        'les', 'los', 'nos'
-    );
-
-    private static $PRO_0_SUF1 = array(
-        'éndo', 'ándo', 'ár', 'ér', 'ír'
-    );
-
-    private static $PRO_0_SUF2 = array(
-        'ando', 'iendo', 'ar', 'er', 'ir'
-    );
-
-    private static $_1_SUF1 = array(
-        'anza', 'anzas', 'ico', 'ica', 'icos',
-        'icas', 'ismo', 'ismos', 'able', 'ables',
-        'ible', 'ibles', 'ista', 'istas', 'oso',
-        'osa', 'osos', 'osas', 'amiento', 'amientos',
-        'imiento', 'imientos'
-    );
-
-    private static $_1_SUF2 = array(
-        'icadora', 'icador', 'icación',
-        'icadoras', 'icadores', 'icaciones',
-        'icante', 'icantes', 'icancia', 'icancias',
-        'adora', 'ador', 'ación', 'adoras',
-        'adores', 'aciones', 'ante', 'antes',
-        'ancia', 'ancias'
-    );
-
-    private static $_1_SUF_LOG = array(
-        'logía', 'logías'
-    );
-
-    private static $_1_SUF_UC = array(
-        'ución', 'uciones'
-    );
-
-    private static $_1_SUF_ENC = array(
-        'encia', 'encias'
-    );
-
-    private static $_1_SUF_MEN_1 = array(
-        'ativamente', 'ivamente', 'osamente', 'icamente', 'adamente'
-    );
-
-    private static $_1_SUF_MEN_2 = array(
-        'amente'
-    );
-
-    private static $_1_SUF_MEN_3 = array(
-        'antemente', 'ablemente', 'iblemente', 'mente'
-    );
-
-    private static $_1_SUF_DA = array(
-        'abilidad', 'abilidades', 'icidad', 'icidades',
-        'ividad', 'ividades', 'idad', 'idades'
-    );
-
-    private static $_1_SUF_I = array(
-        'ativa', 'ativo', 'ativas', 'ativos',
-        'iva', 'ivo', 'ivas', 'ivos'
-    );
-
-    private static $_2a_SUF = array(
-        'ya', 'ye', 'yan', 'yen', 'yeron',
-        'yendo', 'yo', 'yó', 'yas', 'yes',
-        'yais', 'yamos'
-    );
-
-    private static $_2b_SUF_1 = array(
-        'en', 'es', 'éis', 'emos'
-    );
-
-    private static $_2b_SUF_2 = array(
-        'arían', 'arías', 'arán', 'arás', 'aríais',
-        'aría', 'aréis', 'aríamos', 'aremos', 'ará',
-        'aré', 'erían', 'erías', 'erán', 'erás', 'eríais',
-        'ería', 'eréis', 'eríamos', 'eremos', 'erá', 'eré',
-        'irían', 'irías', 'irán', 'irás', 'iríais', 'iría',
-        'iréis', 'iríamos', 'iremos', 'irá', 'iré', 'aba',
-        'ada', 'ida', 'ía', 'ara', 'iera', 'ad', 'ed',
-        'id', 'ase', 'iese', 'aste', 'iste', 'an',
-        'aban', 'ían', 'aran', 'ieran', 'asen',
-        'iesen', 'aron', 'ieron', 'ado', 'ido',
-        'ando', 'iendo', 'ió', 'ar', 'er', 'ir',
-        'as', 'abas', 'adas', 'idas', 'ías', 'aras',
-        'ieras', 'ases', 'ieses', 'ís', 'áis', 'abais',
-        'íais', 'arais', 'ierais', '  aseis', 'ieseis',
-        'asteis', 'isteis', 'ados', 'idos', 'amos', 'ábamos',
-        'íamos', 'imos', 'áramos', 'iéramos', 'iésemos', 'ásemos'
-    );
-
-    private static $_3_SUF_1 = array(
-        'os', 'a', 'o', 'á', 'í', 'ó'
-    );
-
-    private static $_3_SUF_2 = array(
-        'e', 'é'
-    );
 }
