@@ -26,24 +26,6 @@ class StemmTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @test
-     */
-    public function consonantes()
-    {
-        $consonants = array('b','c','d','f','g');
-
-        $count = 0;
-        $expected = 10;
-
-        for ($i=0; $i < count($consonants); $i++) {
-            $count += Stemm::isConsonant($consonants[$i]);
-        }
-
-        $this->assertEquals(count($consonants), $count);
-
-    }
-
-    /**
      * @return array|mixed
      */
     public static function provider()
