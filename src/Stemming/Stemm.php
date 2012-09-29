@@ -261,8 +261,8 @@ class Stemm
             'abas', 'adas', 'idas', 'ías', 'aras',
             'ieras', 'as', 'ases', 'ieses', 'ís', 'áis', 'abais',
             'íais', 'arais', 'ierais', '  aseis', 'ieseis',
-            'asteis', 'isteis', 'ados', 'idos', 'amos', 'ábamos',
-            'íamos', 'imos', 'áramos', 'iéramos', 'iésemos', 'ásemos'
+            'asteis', 'isteis', 'ados', 'idos', 'ábamos',
+            'íamos', 'imos', 'áramos', 'iéramos', 'amos', 'iésemos', 'ásemos'
         );
 
         $rv_txt = mb_substr($word,$rv);
