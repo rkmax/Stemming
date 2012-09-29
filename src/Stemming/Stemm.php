@@ -15,14 +15,14 @@ class Stemm
     }
 
     public static function getNextVowelPos($word, $start = 0) {
-        $len = strlen($word);
+        $len = mb_strlen($word);
         for ($i = $start; $i < $len; $i++)
             if (self::isVowel($word[$i])) return $i;
         return $len;
     }
 
     public static function getNextConsonantPos($word, $start = 0) {
-        $len = strlen($word);
+        $len = mb_strlen($word);
         for ($i = $start; $i < $len; $i++)
             if (!self::isVowel($word[$i])) return $i;
         return $len;
@@ -131,14 +131,14 @@ class Stemm
 
         if ('' != ($ends0 = self::endsIn($rv_txt, $pronoun))) {
             $rv_txt = mb_substr($word, $rv);
-            if ('' != ($ends = self::endsIn(mb_substr($rv_txt, 0, -strlen($ends0)), $suffix_a))) {
-                $word = self::removeAccent(mb_substr($word, 0, -strlen($ends0)));
+            if ('' != ($ends = self::endsIn(mb_substr($rv_txt, 0, -mb_strlen($ends0)), $suffix_a))) {
+                $word = self::removeAccent(mb_substr($word, 0, -mb_strlen($ends0)));
             } elseif (
-                ('' != ($ends = self::endsIn(mb_substr($rv_txt, 0, -strlen($ends0)), $suffix_b))) ||
+                ('' != ($ends = self::endsIn(mb_substr($rv_txt, 0, -mb_strlen($ends0)), $suffix_b))) ||
                     (('' != ($ends = self::endsIn($rv_txt, 'yendo'))) &&
                         (mb_substr($word, 0, -6, 1) == 'u'))
                 ) {
-                $word = mb_substr($word, 0, -strlen($ends0));
+                $word = mb_substr($word, 0, -mb_strlen($ends0));
             }
         }
 
@@ -194,13 +194,13 @@ class Stemm
         );
 
         if ('' != ($ends = self::endsIn($r2_txt, $suffix))) {
-            $word = mb_substr($word, 0, -strlen($ends));
+            $word = mb_substr($word, 0, -mb_strlen($ends));
         } else {
             $ends = '';
             foreach ($suffix_r as $replace => $suffix_) {
                 $ends = self::endsIn($r2_txt, $suffix_);
                 if(!empty($ends)) {
-                    $word = mb_substr($word, 0, -strlen($ends)) . $replace;
+                    $word = mb_substr($word, 0, -mb_strlen($ends)) . $replace;
                     break;
                 }
             }
@@ -208,11 +208,11 @@ class Stemm
 
         if(empty($ends)) {
             if('' != ($ends = self::endsIn($r2_txt, $suffix_amente))) {
-                $word = mb_substr($word, 0, -strlen($ends));
+                $word = mb_substr($word, 0, -mb_strlen($ends));
             } elseif('' != ($ends = self::endsIn($r1_txt, 'amente'))) {
-                $word = mb_substr($word, 0, -strlen($ends));
+                $word = mb_substr($word, 0, -mb_strlen($ends));
             } elseif('' != ($ends = self::endsIn($r2_txt, $suffix_remain))) {
-                $word = mb_substr($word, 0, -strlen($ends));
+                $word = mb_substr($word, 0, -mb_strlen($ends));
             }
         }
 
@@ -230,8 +230,8 @@ class Stemm
         $rv_txt = mb_substr($word,$rv);
         $ends = self::endsIn($rv_txt, $suffix);
 
-        if (!empty($ends) && (mb_substr($word,-strlen($ends)-1,1) == 'u')) {
-            $word = mb_substr($word, 0, -strlen($ends));
+        if (!empty($ends) && (mb_substr($word,-mb_strlen($ends)-1,1) == 'u')) {
+            $word = mb_substr($word, 0, -mb_strlen($ends));
         }
 
         return $word;
@@ -266,12 +266,12 @@ class Stemm
         $rv_txt = mb_substr($word,$rv);
 
         if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
-            $word = mb_substr($word, 0, -strlen($ends));
+            $word = mb_substr($word, 0, -mb_strlen($ends));
             if('' != ($ends = self::endsIn($word, 'gu'))) {
                 $word = mb_substr($word, 0, -1);
             }
         } elseif ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) {
-            $word = mb_substr($word, 0, -strlen($ends));
+            $word = mb_substr($word, 0, -mb_strlen($ends));
         }
 
         return $word;
@@ -290,7 +290,7 @@ class Stemm
         $rv_txt = mb_substr($word,$rv);
 
         if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
-            $word = mb_substr($word, 0, -strlen($ends));
+            $word = mb_substr($word, 0, -mb_strlen($ends));
         } elseif ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) {
             $word = rtrim($word, $ends);
             $rv_txt = mb_substr($word, $rv);
