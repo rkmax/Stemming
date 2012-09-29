@@ -5,7 +5,7 @@ namespace Stemming;
 /**
 *
 */
-class Stemm
+class SpanishPorter
 {
     const VOWEL = '/[aeiouáéíóúü]/u';
 

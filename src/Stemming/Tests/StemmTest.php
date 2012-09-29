@@ -2,12 +2,12 @@
 
 namespace Stemming\Tests;
 
-use Stemming\Stemm;
+use Stemming\SpanishPorter;
 
 /**
 *
 */
-class StemmTest extends \PHPUnit_Framework_TestCase
+class SpanishPorterTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @test
@@ -18,7 +18,7 @@ class StemmTest extends \PHPUnit_Framework_TestCase
         $count = 0;
 
         for ($i=0; $i < count($vocals); $i++) {
-            $count += Stemm::isVowel($vocals[$i]);
+            $count += SpanishPorter::isVowel($vocals[$i]);
         }
 
         $this->assertEquals(count($vocals), $count);
@@ -59,7 +59,7 @@ class StemmTest extends \PHPUnit_Framework_TestCase
      */
     public function removerAcento($expected, $actual)
     {
-        $this->assertEquals($expected, Stemm::removeAccent($actual));
+        $this->assertEquals($expected, SpanishPorter::removeAccent($actual));
     }
 
     /**
@@ -68,7 +68,7 @@ class StemmTest extends \PHPUnit_Framework_TestCase
      */
     public function raizPalabras($palabra, $expected)
     {
-        $this->assertEquals($expected, Stemm::stem($palabra));
+        $this->assertEquals($expected, SpanishPorter::stem($palabra));
     }
 
     /**
@@ -79,7 +79,7 @@ class StemmTest extends \PHPUnit_Framework_TestCase
         $palabra = 'cariñoso';
         $expected = 'cariñ';
 
-        $this->assertEquals($expected, Stemm::stem($palabra, true));
+        $this->assertEquals($expected, SpanishPorter::stem($palabra, true));
     }
 
     public static function terminaEnProvider()
@@ -103,7 +103,7 @@ class StemmTest extends \PHPUnit_Framework_TestCase
             'ar', 'er', 'oir', 'zas', 'za', 'tel'
         );
 
-        $this->assertEquals($expected, Stemm::endsIn($value, $terminaciones));
+        $this->assertEquals($expected, SpanishPorter::endsIn($value, $terminaciones));
     }
 
     public static function regionesProvider()
@@ -124,9 +124,9 @@ class StemmTest extends \PHPUnit_Framework_TestCase
     {
 
         $len= strlen($word);
-        $r1 = Stemm::R($word);
-        $r2 = Stemm::R($word, $r1);
-        $rv = Stemm::RV($word);
+        $r1 = SpanishPorter::R($word);
+        $r2 = SpanishPorter::R($word, $r1);
+        $rv = SpanishPorter::RV($word);
 
         $this->assertEquals($r1expected, substr($word, $r1));
         $this->assertEquals($r2expected, substr($word, $r2));
