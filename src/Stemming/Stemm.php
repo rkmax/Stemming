@@ -294,7 +294,7 @@ class Stemm
         if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
             $word = mb_substr($word, 0, -mb_strlen($ends));
         } elseif ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) {
-            $word = rtrim($word, $ends);
+            $word = mb_substr($word, 0, -1);
             $rv_txt = mb_substr($word, $rv);
 
             if(('' != ($ends = self::endsIn($rv_txt, 'u'))) &&
