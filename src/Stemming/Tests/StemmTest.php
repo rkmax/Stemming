@@ -16,13 +16,13 @@ class StemmTest extends \PHPUnit_Framework_TestCase
     {
         $vocals = array('a','e','i','o','u','á','é','í','ó','ú','ü');
         $count = 0;
-        $expected = 10;
 
         for ($i=0; $i < count($vocals); $i++) {
             $count += Stemm::isVowel($vocals[$i]);
         }
 
         $this->assertEquals(count($vocals), $count);
+
     }
 
     /**
@@ -76,8 +76,8 @@ class StemmTest extends \PHPUnit_Framework_TestCase
      */
     public function raizUnaPalabra()
     {
-        $palabra = 'aplicáramos';
-        $expected = 'aplic';
+        $palabra = 'cariñoso';
+        $expected = 'cariñ';
 
         $this->assertEquals($expected, Stemm::stem($palabra, true));
     }

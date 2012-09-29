@@ -7,7 +7,7 @@ namespace Stemming;
 */
 class Stemm
 {
-    const VOWEL = '/^[aeiouáéíóúü]/';
+    const VOWEL = '/[aeiouáéíóúü]/u';
 
     public static function isVowel($letter)
     {
@@ -67,8 +67,11 @@ class Stemm
             return $word;
         }
 
-        $r1 = self::R1($word, $len);
-        $r2 = self::R2($word, $len, $r1);
+        // $r1 = self::R1($word, $len);
+        // $r2 = self::R2($word, $len, $r1);
+        // $rv = self::RV($word, $len);
+        $r1 = self::R($word);
+        $r2 = self::R($word, $r1);
         $rv = self::RV($word, $len);
 
         // Step 0: Attached pronoun
@@ -306,12 +309,27 @@ class Stemm
         return $word;
     }
 
-    public static function R1($word, $len)
+    public static function R($word, $start = 0)
+    {
+        $letters = self::mb_str_split($word);
+        $r = $len = count($letters);
+
+        for ($i = $start; $i < ($len -1) && $r == $len; $i++) {
+            if (self::isVowel($letters[$i]) && !self::isVowel($letters[$i+1])) {
+                $r = $i + 2;
+                break;
+            }
+        }
+
+        return $r;
+    }
+
+    public static function R1($word, $len, $start = 0)
     {
         $letters = self::mb_str_split($word);
         $r1 = $len = count($letters);
 
-        for ($i = 0; $i < ($len - 1) && $r1 == $len; $i++) {
+        for ($i = $start; $i < ($len - 1) && $r1 == $len; $i++) {
             if (self::isVowel($letters[$i]) && !self::isVowel($letters[$i+1])) {
                     $r1 = $i + 2;
             }
