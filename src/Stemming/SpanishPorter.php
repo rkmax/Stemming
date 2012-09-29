@@ -7,6 +7,8 @@ namespace Stemming;
 */
 class SpanishPorter
 {
+    const ENCODING = "UTF-8";
+
     const VOWEL = '/[aeiouáéíóúü]/u';
 
     public static function isVowel($letter)
@@ -48,7 +50,7 @@ class SpanishPorter
         }
 
         foreach ($suffix as $value) {
-            if (preg_match("/${value}$/", $word)) {
+            if (preg_match("/${value}$/u", $word)) {
                 return $value;
             }
         }
@@ -56,12 +58,13 @@ class SpanishPorter
         return '';
     }
 
-    public static function stem($word, $debug = false)
+    public static function stem($word)
     {
-        mb_internal_encoding("UTF-8");
+        mb_internal_encoding(self::ENCODING);
+        mb_regex_encoding(self::ENCODING);
 
+        $word = mb_strtolower($word);
         $len = mb_strlen($word);
-        $word = $original = mb_strtolower($word, 'UTF-8');
 
         if ($len <= 2) {
             return self::removeAccent($word);
@@ -72,10 +75,10 @@ class SpanishPorter
         $rv = self::RV($word);
 
         // Step 0: Attached pronoun
-        $word = $step0Word  = self::step0($word, $r1, $r2, $rv);
+        $word = $step0Word = self::step0($word, $r1, $r2, $rv);
 
         // Step 1: Stadanrd Suffix removal
-        $word = $step1Word  = self::step1($step0Word, $r1, $r2, $rv);
+        $word = $step1Word = self::step1($step0Word, $r1, $r2, $rv);
 
         // Step 2: Verb Suffix
         if ($step1Word == $step0Word) {
@@ -90,21 +93,6 @@ class SpanishPorter
 
         // Step 3: Residual suffix
         $word = self::step3($word, $r1, $r2, $rv);
-
-        if ($debug) {
-            print "\nDebug\n";
-            print "Internal ENCODING: " . mb_internal_encoding();
-            print "\nLetter count : " . mb_strlen ($original) . "\n\n  ";
-            print implode('  ', self::mb_str_split($original));
-            print "\n\nR1[$r1]: " . mb_substr($original,$r1);
-            print "\nR2[$r2]: " . mb_substr($original,$r2);
-            print "\nRV[$rv]: " . mb_substr($original,$rv);
-            print "\nSteps [0] $step0Word\n";
-            print "Steps [1] $step1Word\n";
-            if(isset($step2aWord)) print "Steps [2a] $step2aWord\n";
-            if(isset($step2bWord)) print "Steps [2b] $step2bWord\n";
-            print "Steps [3] $word\n";
-        }
 
         return self::removeAccent($word);
     }
