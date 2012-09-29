@@ -76,8 +76,8 @@ class StemmTest extends \PHPUnit_Framework_TestCase
      */
     public function raizUnaPalabra()
     {
-        $palabra = 'acepté';
-        $expected = 'acept';
+        $palabra = 'ácida';
+        $expected = 'acid';
 
         $this->assertEquals($expected, Stemm::stem($palabra, true));
     }

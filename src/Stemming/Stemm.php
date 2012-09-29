@@ -56,8 +56,10 @@ class Stemm
 
     public static function stem($word, $debug = false)
     {
-        $len = strlen($word);
-        $word = mb_strtolower($word, 'UTF-8');
+        mb_internal_encoding("UTF-8");
+
+        $len = mb_strlen($word);
+        $word = $original = mb_strtolower($word, 'UTF-8');
 
         if ($len <= 2) {
             return $word;
@@ -89,10 +91,13 @@ class Stemm
 
         if ($debug) {
             print "\nDebug\n";
-            print "R1: $r1\n";
-            print "R2: $r2\n";
-            print "RV: $rv\n";
-            print "Steps [0] $step0Word\n";
+            print "Internal ENCODING: " . mb_internal_encoding();
+            print "\nLetter count : " . mb_strlen ($original) . "\n";
+            print implode(' ', str_split($original));
+            print "\nR1[$r1]: " . mb_substr($original,$r1);
+            print "\nR2[$r2]: " . mb_substr($original,$r2);
+            print "\nRV[$rv]: " . mb_substr($original,$rv);
+            print "\nSteps [0] $step0Word\n";
             print "Steps [1] $step1Word\n";
             print "Steps [2a] $step2aWord\n";
             print "Steps [2b] $step2bWord\n";
@@ -122,18 +127,18 @@ class Stemm
         $suffix_a = array('iéndo','ándo','ár', 'ér', 'ír');
         $suffix_b = array('ando', 'iendo', 'ar', 'er', 'ir');
 
-        $rv_txt = substr($word, $rv);
+        $rv_txt = mb_substr($word, $rv);
 
         if ('' != ($ends0 = self::endsIn($rv_txt, $pronoun))) {
-            $rv_txt = substr($word, $rv);
-            if ('' != ($ends = self::endsIn(substr($rv_txt, 0, -strlen($ends0)), $suffix_a))) {
-                $word = self::removeAccent(substr($word, 0, -strlen($ends0)));
+            $rv_txt = mb_substr($word, $rv);
+            if ('' != ($ends = self::endsIn(mb_substr($rv_txt, 0, -strlen($ends0)), $suffix_a))) {
+                $word = self::removeAccent(mb_substr($word, 0, -strlen($ends0)));
             } elseif (
-                ('' != ($ends = self::endsIn(substr($rv_txt, 0, -strlen($ends0)), $suffix_b))) ||
+                ('' != ($ends = self::endsIn(mb_substr($rv_txt, 0, -strlen($ends0)), $suffix_b))) ||
                     (('' != ($ends = self::endsIn($rv_txt, 'yendo'))) &&
-                        (substr($word, 0, -6, 1) == 'u'))
+                        (mb_substr($word, 0, -6, 1) == 'u'))
                 ) {
-                $word = substr($word, 0, -strlen($ends0));
+                $word = mb_substr($word, 0, -strlen($ends0));
             }
         }
 
@@ -149,8 +154,8 @@ class Stemm
 
     public static function step1($word, $r1, $r2, $rv)
     {
-        $r1_txt = substr($word,$r1);
-        $r2_txt = substr($word,$r2);
+        $r1_txt = mb_substr($word,$r1);
+        $r2_txt = mb_substr($word,$r2);
 
         $suffix = array(
             // A
@@ -189,13 +194,13 @@ class Stemm
         );
 
         if ('' != ($ends = self::endsIn($r2_txt, $suffix))) {
-            $word = substr($word, 0, -strlen($ends));
+            $word = mb_substr($word, 0, -strlen($ends));
         } else {
             $ends = '';
             foreach ($suffix_r as $replace => $suffix_) {
                 $ends = self::endsIn($r2_txt, $suffix_);
                 if(!empty($ends)) {
-                    $word = substr($word, 0, -strlen($ends)) . $replace;
+                    $word = mb_substr($word, 0, -strlen($ends)) . $replace;
                     break;
                 }
             }
@@ -203,11 +208,11 @@ class Stemm
 
         if(empty($ends)) {
             if('' != ($ends = self::endsIn($r2_txt, $suffix_amente))) {
-                $word = substr($word, 0, -strlen($ends));
+                $word = mb_substr($word, 0, -strlen($ends));
             } elseif('' != ($ends = self::endsIn($r1_txt, 'amente'))) {
-                $word = substr($word, 0, -strlen($ends));
+                $word = mb_substr($word, 0, -strlen($ends));
             } elseif('' != ($ends = self::endsIn($r2_txt, $suffix_remain))) {
-                $word = substr($word, 0, -strlen($ends));
+                $word = mb_substr($word, 0, -strlen($ends));
             }
         }
 
@@ -222,11 +227,11 @@ class Stemm
             'yais', 'yamos'
         );
 
-        $rv_txt = substr($word,$rv);
+        $rv_txt = mb_substr($word,$rv);
         $ends = self::endsIn($rv_txt, $suffix);
 
-        if (!empty($ends) && (substr($word,-strlen($ends)-1,1) == 'u')) {
-            $word = substr($word, 0, -strlen($ends));
+        if (!empty($ends) && (mb_substr($word,-strlen($ends)-1,1) == 'u')) {
+            $word = mb_substr($word, 0, -strlen($ends));
         }
 
         return $word;
@@ -258,15 +263,15 @@ class Stemm
             'íamos', 'imos', 'áramos', 'iéramos', 'iésemos', 'ásemos'
         );
 
-        $rv_txt = substr($word,$rv);
+        $rv_txt = mb_substr($word,$rv);
 
         if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
-            $word = substr($word, 0, -strlen($ends));
+            $word = mb_substr($word, 0, -strlen($ends));
             if('' != ($ends = self::endsIn($word, 'gu'))) {
-                $word = substr($word, 0, -1);
+                $word = mb_substr($word, 0, -1);
             }
         } elseif ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) {
-            $word = substr($word, 0, -strlen($ends));
+            $word = mb_substr($word, 0, -strlen($ends));
         }
 
         return $word;
@@ -282,17 +287,17 @@ class Stemm
             'e', 'é'
         );
 
-        $rv_txt = substr($word,$rv);
+        $rv_txt = mb_substr($word,$rv);
 
         if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
-            $word = substr($word, 0, -strlen($ends));
+            $word = mb_substr($word, 0, -strlen($ends));
         } elseif ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) {
             $word = rtrim($word, $ends);
-            $rv_txt = substr($word, $rv);
+            $rv_txt = mb_substr($word, $rv);
 
             if(('' != ($ends = self::endsIn($rv_txt, 'u'))) &&
                 ('' != ($ends = self::endsIn($word, 'gu')))) {
-                $word = substr($word, 0, -1);
+                $word = mb_substr($word, 0, -1);
             }
         }
 
