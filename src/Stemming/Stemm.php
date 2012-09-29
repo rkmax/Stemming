@@ -274,7 +274,6 @@ class Stemm
 
     public static function step3($word, $r1, $r2, $rv)
     {
-
         $suffix_a = array(
             'os', 'a', 'o', 'á', 'í', 'ó'
         );
@@ -288,10 +287,10 @@ class Stemm
         if ('' != ($ends = self::endsIn($rv_txt, $suffix_a))) {
             $word = substr($word, 0, -strlen($ends));
         } elseif ('' != ($ends = self::endsIn($rv_txt, $suffix_b))) {
-            $word = substr($word, 0, -1);
-            $rv_txt = substr($word,$rv);
+            $word = rtrim($word, $ends);
+            $rv_txt = substr($word, $rv);
 
-            if(('' != ($ends = self::endsIn($word, 'u'))) &&
+            if(('' != ($ends = self::endsIn($rv_txt, 'u'))) &&
                 ('' != ($ends = self::endsIn($word, 'gu')))) {
                 $word = substr($word, 0, -1);
             }
