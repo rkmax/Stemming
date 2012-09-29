@@ -251,8 +251,8 @@ class Stemm
             'aban', 'an', 'ían', 'aran', 'ieran', 'asen',
             'iesen', 'aron', 'ieron', 'ado', 'ido',
             'ando', 'iendo', 'ió', 'ar', 'er', 'ir',
-            'abas', 'adas', 'as', 'idas', 'ías', 'aras',
-            'ieras', 'ases', 'ieses', 'ís', 'áis', 'abais',
+            'abas', 'adas', 'idas', 'ías', 'aras',
+            'ieras', 'as', 'ases', 'ieses', 'ís', 'áis', 'abais',
             'íais', 'arais', 'ierais', '  aseis', 'ieseis',
             'asteis', 'isteis', 'ados', 'idos', 'amos', 'ábamos',
             'íamos', 'imos', 'áramos', 'iéramos', 'iésemos', 'ásemos'
