@@ -64,7 +64,7 @@ class Stemm
         $word = $original = mb_strtolower($word, 'UTF-8');
 
         if ($len <= 2) {
-            return $word;
+            return self::removeAccent($word);
         }
 
         // $r1 = self::R1($word, $len);
